@@ -11,6 +11,12 @@ The Real Time Traffic Generator and Analyzer!
 	Make sure to pass **--swear-time-sync** flag to the applications to indicate
 	(swear) that sender and receiver hosts operated with synchronize slots.
 
+	Tip: before measurements you SHOULD connect both sender and receiver directly
+	and do local tests. You should see delays raised by network adapters, network
+	stack delay and operating system scheduling imprecisions. Often these variation
+	are not to prevent. But you should consider using a realtime operating system,
+	tune your network adapter, use realtime scheduling policies, etc.
+
 
 
 ```
