@@ -1,3 +1,17 @@
+# rt-traffic-generator
+
+The Real Time Traffic Generator and Analyzer!
+
+## Precondition
+
+- rt-traffic-generator can operate in a fallback and full fledged mode. To
+	operate in full fledged the send and the receive host need exactly
+	synchronized clocks. This required GPS mouses or PTP. Sender as well as
+	receiver are not build upon exact clocks, but the anayzer applications are!
+	Make sure to pass **--swear-time-sync** flag to the applications to indicate
+	(swear) that sender and receiver hosts operated with synchronize slots.
+
+
 
 ```
 	{
