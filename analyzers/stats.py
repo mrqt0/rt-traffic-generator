@@ -44,13 +44,37 @@ def db_new():
 
 def analyse(db):
     for stream_id, stream_data in db['streams-tx'].items():
+        print("\n\033[0;32mStream {} \033[00m ".format(stream_id))
+        min_ = max_ = None
+
+        cnt = sum_ = 0
+        lost_packets = 0
+        tx_packets = rx_packets = 0
         for packet_data in stream_data:
+            tx_packets += 1
             if packet_data['seq-no'] in db['streams-rx'][stream_id]:
                 rx_packet = db['streams-rx'][stream_id][packet_data['seq-no']]
-                print("tx time: {}".format(packet_data['tx-time']))
-                print("rx time: {}".format(rx_packet['rx-time']))
+                #print("tx time: {}".format(packet_data['tx-time']))
+                #print("rx time: {}".format(rx_packet['rx-time']))
+                diff = (rx_packet['rx-time'] - packet_data['tx-time']) * 1000
+                sum_ += diff
+                if not min_ or diff < min_:
+                    min_ = diff
+                if not max_ or diff > max_:
+                    max_ = diff
+                cnt += 1
+                rx_packets += 1
             else:
-                print("packet loss")
+                lost_packets += 1
+
+        print(" packets transmitted: {}".format(tx_packets))
+        print(" packets lost: {} (received: {})".format(lost_packets, rx_packets))
+        print(" delay min: {0:.6f} ms".format(min_))
+        print(" delay max: {0:.6f} ms".format(max_))
+        print(" delay avg: {0:.6f} ms".format(sum_ / cnt))
+        if lost_packets:
+            print("\033[0;31mPACKET LOSS DETECTED\033[00m")
+        print("")
 
 def process(db, conf):
     with open(conf.trace_tx) as fd_tx:
