@@ -17,11 +17,10 @@ The Real Time Traffic Generator and Analyzer!
 	are not to prevent. But you should consider using a realtime operating system,
 	tune your network adapter, use realtime scheduling policies, etc.
 
-
+## Test Description - Template Files
 
 ```
 	{
-			'port' : 6000,
 			'payload-size' : 20,
 
 			'initial-waittime' : 0.1,
@@ -31,7 +30,6 @@ The Real Time Traffic Generator and Analyzer!
 			'burst-inter-time' : 5.0
 	},
 	{
-			'port' : 6001,
 			'payload-size' : 20,
 
 			'initial-waittime' : 1,
@@ -41,7 +39,6 @@ The Real Time Traffic Generator and Analyzer!
 			'burst-inter-time' : 5.0
 	},
 	{
-			'port' : 6002,
 			'payload-size' : 20,
 
 			'initial-waittime' : 1,
@@ -51,7 +48,6 @@ The Real Time Traffic Generator and Analyzer!
 			'burst-inter-time' : 5.0
 	},
 	{
-			'port' : 6003,
 			'payload-size' : 20,
 
 			'initial-waittime' : 1,
@@ -61,7 +57,6 @@ The Real Time Traffic Generator and Analyzer!
 			'burst-inter-time' : 5.0
 	},
 	{
-			'port' : 6004,
 			'payload-size' : 20,
 
 			'initial-waittime' : 0.1,
@@ -71,6 +66,39 @@ The Real Time Traffic Generator and Analyzer!
 			'burst-inter-time' : 5.0
 	}
 ```
+
+## Execting Tests
+
+### Start Receiver
+
+The receiver should be started at the beginning. The output (JSON) is redirected to the file `rx.trace`.
+Here template 5-streams-10-byte-random.conf is used.
+
+```
+./rt-traffic-generator-rx.py -f templates/5-streams-10-byte-random.conf > rx.trace
+```
+
+## Start Transmitter:
+
+Similar the output is saved in tx.trace
+
+```
+./rt-traffic-generator-tx.py -f templates/5-streams-10-byte-random.conf > tx.trace
+```
+
+## End Test and Analysis
+
+To finish the tests the transmitter should be killed first. Later the receiver.
+
+Both files should be copied/moved to one PC.
+
+The data can now be analyzed with one of the shipped scripts:
+
+```
+./analyzers/stats.py --trace-rx rx.trace --trace-tx tx.trace
+```
+
+## Trace File Format
 
 ```
 {"payload-size": 20, "seq-no": 0, "stream": 0, "tx-time": "2017-07-05 20:14:45.537594"}
