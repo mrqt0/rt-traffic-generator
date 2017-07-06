@@ -17,6 +17,9 @@ import pprint
 import random
 import string
 
+def high_res_timestamp():
+    utc = datetime.datetime.utcnow()
+    return utc.timestamp() + utc.microsecond / 1e6
 
 def init_v4_rx_fd(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -81,7 +84,7 @@ def process_data(ctx, data, i, msg):
     p['seq-no'] = seq
     p['payload-size'] = len(msg)
     p['stream'] = name(data, i)
-    p['rx-time'] = str(datetime.datetime.utcnow())
+    p['rx-time'] = high_res_timestamp()
     print(json.dumps(p, sort_keys=True))
     #if seq != data['seq-expected']:
     #    print("sequence not expected - packet loss detected!")

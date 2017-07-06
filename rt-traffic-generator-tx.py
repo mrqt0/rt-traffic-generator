@@ -17,6 +17,9 @@ import pprint
 import random
 import string
 
+def high_res_timestamp():
+    utc = datetime.datetime.utcnow()
+    return utc.timestamp() + utc.microsecond / 1e6
 
 def init_v4_rx_fd(conf):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -29,43 +32,13 @@ def init_v4_rx_fd(conf):
 
 
 def init_v4_tx_fd():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    return sock
-
-async def tx_v4(ctx):
-    while True:
-        try:
-            data = ""
-            ret = fd.sendto(data, (addr, port))
-            emsg = "transmitted OHNDL message via {}:{} of size {}"
-            print(emsg.format(addr, port, ret))
-        except Exception as e:
-            print(str(e))
-        await asyncio.sleep(interval)
-
-
-async def handle_packet(queue, conf, db):
-    while True:
-        entry = await queue.get()
-        data = parse_payload(entry)
-
-
-async def db_check_outdated(db, conf):
-    while True:
-        await asyncio.sleep(1)
-
-
-async def terminal_query_l1_top_addr_loop(db, conf):
-    while True:
-        await asyncio.sleep(float(conf["terminal_interface_get_interval"]))
-
-
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    return s
 
 def ask_exit(signame, loop):
     sys.stderr.write("got signal %s: exit\n" % signame)
     loop.stop()
-
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -76,12 +49,10 @@ def parse_args():
         sys.exit(1)
     return args
 
-
 def load_configuration_file(args):
     config = dict()
     exec(open(args.configuration).read(), config)
     return config
-
 
 def conf_init():
     args = parse_args()
@@ -105,8 +76,7 @@ def ctx_new(conf):
     return {'conf' : conf }
 
 def name(d, i):
-    if 'name' in d:
-        return d['name']
+    if 'name' in d: return d['name']
     return i
 
 def message(ctx, d):
@@ -128,7 +98,7 @@ def tx(ctx, d, stream_name):
     port = d['port']
     msg, seq_no = message(ctx, d)
     s.sendto(msg, (addr, port))
-    print_data['tx-time'] = str(datetime.datetime.utcnow())
+    print_data['tx-time'] = high_res_timestamp()
     print_data['stream'] = stream_name
     print_data['seq-no'] = seq_no
     print_data['payload-size'] = len(msg)
@@ -144,7 +114,6 @@ async def tx_thread(ctx, i):
     d = ctx['rt'][i]
     stream_name = name(d, i)
     if 'initial-waittime' in d['conf']:
-        #print('{} wait for {} seconds'.format(stream_name, d['conf']['initial-waittime']))
         await asyncio.sleep(d['conf']['initial-waittime'])
     while True:
         await burst_mode(ctx, d, i, stream_name)
