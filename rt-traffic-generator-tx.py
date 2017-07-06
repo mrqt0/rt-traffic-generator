@@ -91,12 +91,18 @@ def conf_init():
     return load_configuration_file(args)
 
 def network_init(ctx):
+    port_default_start = 33000
     ctx['rt'] = dict()
     for i, data in enumerate(ctx['conf']['data']):
         ctx['rt'][i] = dict()
         ctx['rt'][i]['fd'] = init_v4_tx_fd()
         ctx['rt'][i]['seq-no'] = 0
         ctx['rt'][i]['conf'] = data
+        if 'port' in data:
+            ctx['rt'][i]['port'] = data['port']
+        else:
+            ctx['rt'][i]['port'] = port_default_start
+            port_default_start += 1
 
 def ctx_new(conf):
     return {'conf' : conf }
@@ -122,7 +128,7 @@ def tx(ctx, d, stream_name):
     print_data = dict()
     s = d['fd']
     addr = ctx['conf']['destination_addr']
-    port = d['conf']['port']
+    port = d['port']
     msg, seq_no = message(ctx, d)
     s.sendto(msg, (addr, port))
     print_data['tx-time'] = str(datetime.datetime.utcnow())
