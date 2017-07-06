@@ -33,9 +33,6 @@ def init_v4_tx_fd():
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return sock
 
-
-
-
 async def tx_v4(ctx):
     while True:
         try:
@@ -116,8 +113,8 @@ def message(ctx, d):
     assert(d['conf']['payload-size'] >= 4)
     payloadsize = d['conf']['payload-size'] - 4
     d['seq-no']
-    hdr = struct.pack('<i', d['seq-no'])
-    msg = hdr + bytes([0xA2 for _ in range(payloadsize)])
+    hdr = struct.pack('!I', d['seq-no'])
+    msg = hdr + bytes([0x00 for _ in range(payloadsize)])
     d['seq-no'] += 1
     return msg, d['seq-no'] - 1
 
@@ -164,11 +161,9 @@ def main():
     for i, data in enumerate(ctx['conf']['data']):
         asyncio.ensure_future(tx_thread(ctx, i))
 
-
     for signame in ('SIGINT', 'SIGTERM'):
         loop.add_signal_handler(getattr(signal, signame),
                                 functools.partial(ask_exit, signame, loop))
-
     try:
         loop.run_forever()
     except KeyboardInterrupt:
