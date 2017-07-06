@@ -17,6 +17,82 @@ The Real Time Traffic Generator and Analyzer!
 	are not to prevent. But you should consider using a realtime operating system,
 	tune your network adapter, use realtime scheduling policies, etc.
 
+
+## Execting Tests
+
+### Start Receiver
+
+The receiver should be started at the beginning. The output (JSON) is redirected to the file `rx.trace`.
+Here template 5-streams-10-byte-random.conf is used.
+
+```
+./rt-traffic-generator-rx.py -f templates/5-streams-10-byte-random.conf > rx.trace
+```
+
+## Start Transmitter:
+
+Similar the output is saved in tx.trace
+
+```
+./rt-traffic-generator-tx.py -f templates/5-streams-10-byte-random.conf > tx.trace
+```
+
+## End Test and Analysis
+
+To finish the tests the transmitter should be killed first. Later the receiver.
+
+Both files should be copied/moved to one PC.
+
+The data can now be analyzed with one of the shipped scripts:
+
+```
+./analyzers/stats.py --trace-rx rx.trace --trace-tx tx.trace
+```
+
+## Output
+
+```
+Stream 0 
+ packets transmitted: 84
+ packets lost: 0 (received: 84)
+ delay min: 0.095844 ms
+ delay max: 2.742290 ms
+ delay avg: 0.362141 ms
+
+
+Stream 1 
+ packets transmitted: 84
+ packets lost: 0 (received: 84)
+ delay min: 0.150204 ms
+ delay max: 0.506401 ms
+ delay avg: 0.320111 ms
+
+
+Stream 2 
+ packets transmitted: 84
+ packets lost: 0 (received: 84)
+ delay min: 0.023842 ms
+ delay max: 0.364304 ms
+ delay avg: 0.241183 ms
+
+
+Stream 3 
+ packets transmitted: 84
+ packets lost: 0 (received: 84)
+ delay min: 0.076294 ms
+ delay max: 0.415802 ms
+ delay avg: 0.240093 ms
+
+
+Stream 4 
+ packets transmitted: 84
+ packets lost: 0 (received: 84)
+ delay min: 0.031948 ms
+ delay max: 1.857758 ms
+ delay avg: 0.278439 ms
+```
+
+
 ## Test Description - Template Files
 
 ```
@@ -65,37 +141,6 @@ The Real Time Traffic Generator and Analyzer!
 			'burst-intra-time' : 0.1,
 			'burst-inter-time' : 5.0
 	}
-```
-
-## Execting Tests
-
-### Start Receiver
-
-The receiver should be started at the beginning. The output (JSON) is redirected to the file `rx.trace`.
-Here template 5-streams-10-byte-random.conf is used.
-
-```
-./rt-traffic-generator-rx.py -f templates/5-streams-10-byte-random.conf > rx.trace
-```
-
-## Start Transmitter:
-
-Similar the output is saved in tx.trace
-
-```
-./rt-traffic-generator-tx.py -f templates/5-streams-10-byte-random.conf > tx.trace
-```
-
-## End Test and Analysis
-
-To finish the tests the transmitter should be killed first. Later the receiver.
-
-Both files should be copied/moved to one PC.
-
-The data can now be analyzed with one of the shipped scripts:
-
-```
-./analyzers/stats.py --trace-rx rx.trace --trace-tx tx.trace
 ```
 
 ## Trace File Format
