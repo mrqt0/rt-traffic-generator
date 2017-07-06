@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--trace-tx", help="TX trace file", type=str, default=None)
     args = parser.parse_args()
     if not args.trace_rx or not args.trace_tx:
-        print("RX and TX files required")
+        print("RX and TX files required, please call --help for further info")
         sys.exit(1)
     return args
 
