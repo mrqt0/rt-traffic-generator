@@ -17,6 +17,8 @@ import pprint
 import random
 import string
 
+DEFAULT_START_PORT = 33000
+
 def high_res_timestamp():
     utc = datetime.datetime.utcnow()
     return utc.timestamp() + utc.microsecond / 1e6
@@ -43,6 +45,7 @@ def ask_exit(signame, loop):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--configuration", help="configuration", type=str, default=None)
+    parser.add_argument("-p", "--port", help="default start port", type=int, default=DEFAULT_START_PORT)
     args = parser.parse_args()
     if not args.configuration:
         print("Configuration required, please specify a valid file path, exiting now")
@@ -56,10 +59,10 @@ def load_configuration_file(args):
 
 def conf_init():
     args = parse_args()
-    return load_configuration_file(args)
+    return args, load_configuration_file(args)
 
 def network_init(ctx):
-    port_default_start = 33000
+    port_default_start = ctx.args.port
     ctx['rt'] = dict()
     for i, data in enumerate(ctx['conf']['data']):
         ctx['rt'][i] = dict()
@@ -72,8 +75,8 @@ def network_init(ctx):
             ctx['rt'][i]['port'] = port_default_start
             port_default_start += 1
 
-def ctx_new(conf):
-    return {'conf' : conf }
+def ctx_new(args, conf):
+    return {'args' : args, 'conf' : conf }
 
 def name(d, i):
     if 'name' in d: return d['name']
@@ -120,8 +123,8 @@ async def tx_thread(ctx, i):
         await asyncio.sleep(d['conf']['burst-inter-time'])
 
 def main():
-    conf = conf_init()
-    ctx = ctx_new(conf)
+    args, conf = conf_init()
+    ctx = ctx_new(args, conf)
 
     network_init(ctx)
     loop = asyncio.get_event_loop()
