@@ -49,6 +49,19 @@ The data can now be analyzed with one of the shipped scripts:
 ./analyzers/stats.py --trace-rx rx.trace --trace-tx tx.trace
 ```
 
+## Options
+
+You can specify the start port by using the port option for rx **and** tx.
+Default is port 33000 and is increased with each stream. I.e.
+
+- Stream 1, Port 33000
+- Stream 2, Port 33001
+- Stream 3, Port 33003
+
+and so on. You can change the start port via `--port 6000` to 6000 for example.
+
+IMPORTANT: you must change the port at sender and receiver side!
+
 ## Output
 
 ```

@@ -62,7 +62,7 @@ def conf_init():
     return args, load_configuration_file(args)
 
 def network_init(ctx):
-    port_default_start = ctx.args.port
+    port_default_start = ctx['args'].port
     ctx['rt'] = dict()
     for i, data in enumerate(ctx['conf']['data']):
         ctx['rt'][i] = dict()
