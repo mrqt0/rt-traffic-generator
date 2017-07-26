@@ -29,7 +29,7 @@ def init_v4_rx_fd(port):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if hasattr(s, "SO_REUSEPORT"):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    s.bind(('localhost', port))
+    s.bind(('', port))
     return s
 
 def ask_exit(signame, loop):
