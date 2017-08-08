@@ -74,6 +74,10 @@ def network_init(ctx):
         else:
             ctx['rt'][i]['port'] = port_default_start
             port_default_start += 1
+        # -1 -> unlimited
+        ctx['rt'][i]['limit'] = -1
+        if 'limit' in data:
+            ctx['rt'][i]['limit'] = int(data['limit'])
 
 def ctx_new(args, conf):
     return {'args' : args, 'conf' : conf }
@@ -82,11 +86,11 @@ def name(d, i):
     if 'name' in d: return d['name']
     return i
 
-def message(ctx, d):
-    assert(d['conf']['payload-size'] >= 4)
-    payloadsize = d['conf']['payload-size'] - 4
+def message(ctx, d, i):
+    assert(d['conf']['payload-size'] >= 8)
+    payloadsize = d['conf']['payload-size'] - 8
     d['seq-no']
-    hdr = struct.pack('!I', d['seq-no'])
+    hdr = struct.pack('!II', d['seq-no'], i)
     msg = hdr + bytes([0x00 for _ in range(payloadsize)])
     d['seq-no'] += 1
     return msg, d['seq-no'] - 1
@@ -94,12 +98,12 @@ def message(ctx, d):
 def print_tx(data):
     print(json.dumps(data, sort_keys=True))
 
-def tx(ctx, d, stream_name):
+def tx(ctx, d, i, stream_name):
     print_data = dict()
     s = d['fd']
     addr = ctx['conf']['destination_addr']
     port = d['port']
-    msg, seq_no = message(ctx, d)
+    msg, seq_no = message(ctx, d, i)
     s.sendto(msg, (addr, port))
     print_data['tx-time'] = high_res_timestamp()
     print_data['stream'] = stream_name
@@ -110,7 +114,15 @@ def tx(ctx, d, stream_name):
 async def burst_mode(ctx, d, i, stream_name):
     no_packets =  d['conf']['bursts-packets']
     for packet_counter in range(0, no_packets):
-        tx(ctx, d, stream_name)
+        tx(ctx, d, i, stream_name)
+        if d['limit'] != -1:
+            # limit activated
+            d['limit'] -= 1
+            if d['limit'] == 0:
+                sys.exit(0)
+        if packet_counter == no_packets -1:
+            # after the last transmission we do not wait
+            return
         await asyncio.sleep(d['conf']['burst-intra-time'])
 
 async def tx_thread(ctx, i):

@@ -72,6 +72,10 @@ def network_init(ctx):
             port_default_start += 1
         ctx['rt'][i]['fd'] = init_v4_rx_fd(ctx['rt'][i]['port'])
         ctx['rt'][i]['seq-expected'] = 0
+        # -1 -> unlimited
+        ctx['rt'][i]['limit'] = -1
+        if 'limit' in data:
+            ctx['rt'][i]['limit'] = int(data['limit'])
 
 def ctx_new(args, conf):
     return {'args' : args, 'conf' : conf }
@@ -82,11 +86,12 @@ def name(d, i):
     return i
 
 def process_data(ctx, data, i, msg):
-    seq = struct.unpack('!I', msg[0:4])[0]
+    data = struct.unpack('!II', msg[0:8])
+    seq, stream_id = data[0], data[1]
     p = {}
     p['seq-no'] = seq
     p['payload-size'] = len(msg)
-    p['stream'] = name(data, i)
+    p['stream'] = stream_id
     p['rx-time'] = high_res_timestamp()
     print(json.dumps(p, sort_keys=True))
     #if seq != data['seq-expected']:
