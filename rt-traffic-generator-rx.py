@@ -86,13 +86,21 @@ def name(d, i):
     return i
 
 def process_data(ctx, data, i, msg):
-    data = struct.unpack('!II', msg[0:8])
-    seq, stream_id = data[0], data[1]
+    pkt_data = struct.unpack('!II', msg[0:8])
+    seq, stream_id = pkt_data[0], pkt_data[1]
     p = {}
     p['seq-no'] = seq
     p['payload-size'] = len(msg)
     p['stream'] = stream_id
     p['rx-time'] = high_res_timestamp()
+
+    if ctx['rt'][stream_id]['limit'] != -1:
+        # limit is activated
+        ctx['rt'][stream_id]['limit'] -= 1
+        if ctx['rt'][stream_id]['limit'] == 0:
+            sys.exit(0)
+
+
     print(json.dumps(p, sort_keys=True))
     #if seq != data['seq-expected']:
     #    print("sequence not expected - packet loss detected!")
