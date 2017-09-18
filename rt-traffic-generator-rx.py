@@ -21,7 +21,7 @@ DEFAULT_START_PORT = 33000
 
 def high_res_timestamp():
     utc = datetime.datetime.utcnow()
-    return utc.timestamp() + utc.microsecond / 1e6
+    return utc.timestamp()
 
 def init_v4_rx_fd(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
