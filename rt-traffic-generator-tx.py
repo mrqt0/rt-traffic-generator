@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 import asyncio
 import socket
@@ -32,10 +32,14 @@ def init_v4_rx_fd(conf):
     s.bind(('localhost', 6666))
     return s
 
-
-def init_v4_tx_fd():
+def init_v4_tx_fd(port=None):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if port is None:
+        return s
+    if hasattr(s, "SO_REUSEPORT"):
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    s.bind(('localhost', port))
     return s
 
 def ask_exit(signame, loop):
@@ -66,7 +70,10 @@ def network_init(ctx):
     ctx['rt'] = dict()
     for i, data in enumerate(ctx['conf']['data']):
         ctx['rt'][i] = dict()
-        ctx['rt'][i]['fd'] = init_v4_tx_fd()
+        if 'src-port' in data:
+            ctx['rt'][i]['fd'] = init_v4_tx_fd(data['src-port'])
+        else:
+            ctx['rt'][i]['fd'] = init_v4_tx_fd()
         ctx['rt'][i]['seq-no'] = 0
         ctx['rt'][i]['conf'] = data
         if 'port' in data:
